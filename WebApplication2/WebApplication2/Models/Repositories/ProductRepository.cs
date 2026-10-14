@@ -69,6 +69,20 @@ namespace WebApplication2.Models.Repositories
                 .OrderBy(p => p.ProductId)
                 .Include(p => p.Category).ToList();
         }
-    }
 
+        public IQueryable<Product> GetAllProducts()
+        {
+            return context.Products.Include(p => p.Category);
+        }
+
+        public void UpdateStock(int productId, int quantite)
+        {
+            Product product = context.Products.Find(productId);
+            if (product != null)
+            {
+                product.QteStock += quantite;
+                context.SaveChanges();
+            }
+        }
+    }
 }

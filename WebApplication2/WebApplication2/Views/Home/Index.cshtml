@@ -1,8 +1,41 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<section class="hero mb-5">
+    <span class="badge bg-light text-primary mb-3 px-3 py-2">
+        <i class="bi bi-truck me-1"></i> Livraison partout en Tunisie
+    </span>
+    <h1>Vos produits du quotidien,<br />livrés chez vous.</h1>
+    <p class="mb-4">Hygiène, beauté et alimentation : commandez en quelques clics et suivez vos commandes en temps réel.</p>
+    <a asp-controller="Product" asp-action="Index" class="btn btn-light btn-lg px-4">
+        <i class="bi bi-bag me-2"></i>Voir les produits
+    </a>
+    <a asp-controller="Category" asp-action="Index" class="btn btn-outline-light btn-lg px-4 ms-2">
+        Catégories
+    </a>
+</section>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card feature-card">
+            <div class="feature-icon"><i class="bi bi-truck"></i></div>
+            <h5>Livraison rapide</h5>
+            <p class="text-muted mb-0">Express en 1 à 2 jours, ou retrait gratuit en magasin.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card">
+            <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+            <h5>Paiement sécurisé</h5>
+            <p class="text-muted mb-0">Carte bancaire, PayPal ou paiement à la livraison.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card">
+            <div class="feature-icon"><i class="bi bi-arrow-repeat"></i></div>
+            <h5>Suivi des commandes</h5>
+            <p class="text-muted mb-0">Consultez et annulez vos commandes depuis votre espace.</p>
+        </div>
+    </div>
 </div>

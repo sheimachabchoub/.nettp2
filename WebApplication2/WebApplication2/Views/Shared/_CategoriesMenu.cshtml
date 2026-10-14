@@ -1,0 +1,30 @@
+@model IEnumerable<WebApplication2.Models.Category>
+ 
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-grid me-2"></i>Catégories</h5>
+    </div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            <a class="text-decoration-none text-dark fw-semibold d-block py-1"
+               asp-controller="Product" asp-action="Index">Tous les produits</a>
+        </li>
+        @if (Model == null || !Model.Any())
+        {
+            <li class="list-group-item text-muted">Aucune catégorie disponible.</li>
+        }
+        else
+        {
+            @foreach (var categorie in Model)
+            {
+                <li class="list-group-item">
+                    <a class="text-decoration-none text-dark fw-semibold d-block py-1"
+                       asp-controller="Product" asp-action="Index"
+                       asp-route-categoryId="@categorie.CategoryId">
+                        @categorie.CategoryName
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+</div>

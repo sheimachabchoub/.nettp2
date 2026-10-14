@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApplication2.Models;
 using WebApplication2.Models.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication2.Controllers
 {
+    [Authorize]
     public class CategoryController : Controller
     {
         readonly ICategorieRepository CategRepository;
@@ -15,28 +17,35 @@ namespace WebApplication2.Controllers
         }
 
         // GET: CategoryController
+        [AllowAnonymous]
         public ActionResult Index()
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             var Categories = CategRepository.GetAll();
             return View(Categories);
         }
 
         // GET: CategoryController/Details/5
+        [AllowAnonymous]
         public ActionResult Details(int id)
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             var category = CategRepository.GetById(id);
             return View(category);
         }
 
         // GET: CategoryController/Create
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Create()
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             return View();
         }
 
         // POST: CategoryController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Create(Category c)
         {
             try
@@ -51,8 +60,10 @@ namespace WebApplication2.Controllers
         }
 
         // GET: CategoryController/Edit/5
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Edit(int id)
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             var category = CategRepository.GetById(id);
             return View(category);
         }
@@ -60,6 +71,7 @@ namespace WebApplication2.Controllers
         // POST: CategoryController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Edit(int id, Category c)
         {
             try
@@ -74,8 +86,10 @@ namespace WebApplication2.Controllers
         }
 
         // GET: CategoryController/Delete/5
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Delete(int id)
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             var category = CategRepository.GetById(id);
             return View(category);
         }
@@ -83,6 +97,7 @@ namespace WebApplication2.Controllers
         // POST: CategoryController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Delete(int id, IFormCollection collection)
         {
             try

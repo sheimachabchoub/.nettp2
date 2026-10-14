@@ -1,32 +1,4 @@
 @model IEnumerable<WebApplication2.Models.Category>
-@{
-    ViewData["Title"] = "Catégories";
-}
-
-<h1>Liste des catégories</h1>
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">Nouvelle catégorie</a>
-</p>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.CategoryName)</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.CategoryName)</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.CategoryId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.CategoryId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.CategoryId">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+@{ ViewData["Title"] = "Catégories"; bool gestion = User.IsInRole("Admin") || User.IsInRole("Manager"); }
+<div class="page-head"><div><h1>Catégories</h1><p class="subtitle">Organisez vos produits par univers</p></div>@if (gestion) { <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nouvelle catégorie</a> }</div>
+<div class="row g-4">@foreach (var item in Model) { <div class="col-sm-6 col-lg-4"><div class="card feature-card text-start"><div class="feature-icon"><i class="bi bi-tag"></i></div><h5>@item.CategoryName</h5><div class="d-flex flex-wrap gap-2 mt-3"><a asp-controller="Product" asp-action="Index" asp-route-categoryId="@item.CategoryId" class="btn btn-sm btn-primary"><i class="bi bi-grid me-1"></i>Voir les produits</a><a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>@if (gestion) { <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a><a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a> }</div></div></div> }</div>

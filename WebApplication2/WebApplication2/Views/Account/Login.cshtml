@@ -1,0 +1,51 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Connexion";
+    var returnUrl = Context.Request.Query["ReturnUrl"];
+}
+
+<div class="card auth-card">
+    <div class="auth-icon"><i class="bi bi-person-lock"></i></div>
+    <h1 class="text-center h3 mb-1">Connexion</h1>
+    <p class="text-center text-muted mb-4">Heureux de vous revoir sur DotNetShop</p>
+
+    <form asp-route-returnurl="@returnUrl" method="post">
+        <div asp-validation-summary="All" class="text-danger small mb-2"></div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Adresse email</label>
+            <div class="input-icon">
+                <i class="bi bi-envelope"></i>
+                <input asp-for="Email" class="form-control" placeholder="exemple@gmail.com" />
+            </div>
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Mot de passe</label>
+            <div class="input-icon">
+                <i class="bi bi-lock"></i>
+                <input asp-for="Password" class="form-control" placeholder="••••••••" />
+            </div>
+            <span asp-validation-for="Password" class="text-danger small"></span>
+        </div>
+
+        <div class="form-check mb-4">
+            <input asp-for="RememberMe" class="form-check-input" />
+            <label asp-for="RememberMe" class="form-check-label">Se souvenir de moi</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-2">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Se connecter
+        </button>
+    </form>
+
+    <p class="text-center text-muted mt-4 mb-0">
+        Pas encore de compte ?
+        <a asp-action="Register" class="fw-semibold">Inscrivez-vous</a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

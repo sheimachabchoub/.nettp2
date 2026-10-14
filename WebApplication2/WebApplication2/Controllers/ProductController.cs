@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using WebApplication2.Models;
@@ -7,13 +8,16 @@ using WebApplication2.ViewModels;
 
 namespace WebApplication2.Controllers
 {
+    [Authorize]
     public class ProductController : Controller
     {
         readonly IProductRepository ProductRepository;
         readonly ICategorieRepository CategRepository;
         private readonly IWebHostEnvironment hostingEnvironment;
 
-        public ProductController(IProductRepository ProdRepository, ICategorieRepository categRepository,
+        public ProductController(
+            IProductRepository ProdRepository,
+            ICategorieRepository categRepository,
             IWebHostEnvironment hostingEnvironment)
         {
             ProductRepository = ProdRepository;
@@ -22,22 +26,54 @@ namespace WebApplication2.Controllers
         }
 
         // GET: ProductController
-        public ActionResult Index()
+        [AllowAnonymous]
+        public IActionResult Index(int? categoryId, int page = 1)
         {
-            var Products = ProductRepository.GetAll();
-            return View(Products);
+            const int pageSize = 4;
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            ViewData["Categories"] = CategRepository.GetAll();
+
+            IQueryable<Product> productsQuery = ProductRepository.GetAllProducts();
+
+            if (categoryId.HasValue)
+            {
+                productsQuery = productsQuery.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            int totalProducts = productsQuery.Count();
+
+            List<Product> products = productsQuery
+                .OrderBy(p => p.ProductId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+            ViewBag.CurrentPage = page;
+            ViewBag.CategoryId = categoryId;
+
+            return View(products);
         }
 
         // GET: ProductController/Details/5
+        [AllowAnonymous]
         public ActionResult Details(int id)
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             var product = ProductRepository.GetById(id);
             return View(product);
         }
 
         // GET: ProductController/Create
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Create()
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             ViewBag.CategoryId = new SelectList(CategRepository.GetAll(), "CategoryId", "CategoryName");
             return View();
         }
@@ -45,6 +81,7 @@ namespace WebApplication2.Controllers
         // POST: ProductController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Create(CreateViewModel model)
         {
             ViewBag.CategoryId = new SelectList(CategRepository.GetAll(), "CategoryId", "CategoryName");
@@ -76,12 +113,15 @@ namespace WebApplication2.Controllers
                 ProductRepository.Add(newProduct);
                 return RedirectToAction("details", new { id = newProduct.ProductId });
             }
+
             return View();
         }
 
         // GET: ProductController/Edit/5
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Edit(int id)
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             ViewBag.CategoryId = new SelectList(CategRepository.GetAll(), "CategoryId", "CategoryName");
             Product product = ProductRepository.GetById(id);
             EditViewModel productEditViewModel = new EditViewModel
@@ -99,6 +139,7 @@ namespace WebApplication2.Controllers
         // POST: ProductController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Edit(EditViewModel model)
         {
             ViewBag.CategoryId = new SelectList(CategRepository.GetAll(), "CategoryId", "CategoryName");
@@ -111,22 +152,31 @@ namespace WebApplication2.Controllers
                 product.QteStock = model.QteStock;
                 product.CategoryId = model.CategoryId;
 
-                if (model.ImagePath != null)
+                // Un input file vide peut être reçu comme un IFormFile non null.
+                // On ne remplace l'image que si un vrai fichier a été envoyé.
+                if (model.ImagePath != null && model.ImagePath.Length > 0)
                 {
-                    if (model.ExistingImagePath != null)
+                    if (!string.IsNullOrWhiteSpace(model.ExistingImagePath))
                     {
                         string filePath = Path.Combine(hostingEnvironment.WebRootPath, "images", model.ExistingImagePath);
-                        System.IO.File.Delete(filePath);
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            System.IO.File.Delete(filePath);
+                        }
                     }
+
                     product.Image = ProcessUploadedFile(model);
                 }
 
                 Product updatedProduct = ProductRepository.Update(product);
                 if (updatedProduct != null)
+                {
                     return RedirectToAction("Index");
-                else
-                    return NotFound();
+                }
+
+                return NotFound();
             }
+
             return View(model);
         }
 
@@ -134,7 +184,8 @@ namespace WebApplication2.Controllers
         private string ProcessUploadedFile(EditViewModel model)
         {
             string uniqueFileName = null;
-            if (model.ImagePath != null)
+
+            if (model.ImagePath != null && model.ImagePath.Length > 0)
             {
                 string uploadsFolder = Path.Combine(hostingEnvironment.WebRootPath, "images");
                 uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImagePath.FileName;
@@ -144,12 +195,15 @@ namespace WebApplication2.Controllers
                     model.ImagePath.CopyTo(fileStream);
                 }
             }
+
             return uniqueFileName;
         }
 
         // GET: ProductController/Delete/5
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Delete(int id)
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             var product = ProductRepository.GetById(id);
             return View(product);
         }
@@ -157,6 +211,7 @@ namespace WebApplication2.Controllers
         // POST: ProductController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult Delete(int id, IFormCollection collection)
         {
             try
@@ -171,8 +226,10 @@ namespace WebApplication2.Controllers
         }
 
         // Recherche par nom de produit ou de catégorie
+        [AllowAnonymous]
         public ActionResult Search(string val)
         {
+            ViewData["Categories"] = CategRepository.GetAll();
             var result = ProductRepository.FindByName(val);
             return View("Index", result);
         }

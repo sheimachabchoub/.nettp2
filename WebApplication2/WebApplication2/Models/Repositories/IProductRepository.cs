@@ -3,6 +3,9 @@
     public interface IProductRepository
     {
         Product GetById(int Id);
+
+        IQueryable<Product> GetAllProducts();
+        void UpdateStock(int productId, int quantite);
         IList<Product> GetAll();
         void Add(Product t);
         Product Update(Product t);
